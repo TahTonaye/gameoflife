@@ -5,7 +5,12 @@ Les bords sont des murs : une cellule hors de la grille n'existe pas,
 un coin a donc au maximum 3 voisins (pas de wrap-around).
 """
 
+from pathlib import Path
+
 import numpy as np
+
+# Dossier patterns/ à la racine du projet, indépendant du cwd.
+PATTERNS_DIR = Path(__file__).resolve().parent.parent / "patterns"
 
 
 def count_neighbours(grid):
@@ -56,3 +61,27 @@ def step(grid):
     new_grid = np.zeros_like(grid)
     new_grid[born | survive] = 1
     return new_grid
+
+
+def load_pattern(name):
+    """Charge un motif CSV depuis patterns/ (ex : "glider" ou "glider.csv").
+
+    ndmin=2 garantit une matrice même pour un motif d'une seule ligne
+    comme le blinker.
+    """
+    if not name.endswith(".csv"):
+        name += ".csv"
+    return np.loadtxt(PATTERNS_DIR / name, delimiter=",", dtype=int, ndmin=2)
+
+
+def place(board, pattern, top=0, left=0):
+    """Pose un motif sur une grille et renvoie une COPIE de celle-ci.
+
+    Le motif doit tenir dans la grille à la position demandée —
+    sinon NumPy lèvera une erreur, ce qui est voulu : pas d'écrasement
+    silencieux.
+    """
+    board = np.asarray(board).copy()
+    h, w = pattern.shape
+    board[top:top + h, left:left + w] = pattern
+    return board

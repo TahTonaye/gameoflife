@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
 
 # La logique du jeu vit dans le moteur : l'interface ne fait
 # qu'afficher l'état et déclencher les générations.
-from game_of_life.engine import step
+from game_of_life.engine import load_pattern, place, step
 
 
 class GameOfLife(QWidget):
@@ -102,22 +102,14 @@ class GameOfLife(QWidget):
         self.play_btn.setText("Play")
         self.generation = 0
 
-        # Vide entièrement la grille.
-        self.world[:] = False
+        # Motif de départ : glider.csv chargé depuis patterns/,
+        # posé au centre de la grille.
+        glider = load_pattern("glider")
+        top = (self.size - glider.shape[0]) // 2
+        left = (self.size - glider.shape[1]) // 2
 
-        # Petit motif classique de départ : un glider au centre.
-        mid = self.size // 2
-        pattern = [
-            (mid - 1, mid),
-            (mid, mid + 1),
-            (mid + 1, mid - 1),
-            (mid + 1, mid),
-            (mid + 1, mid + 1),
-        ]
-
-        for r, c in pattern:
-            if 0 <= r < self.size and 0 <= c < self.size:
-                self.world[r, c] = True
+        empty = np.zeros((self.size, self.size), dtype=bool)
+        self.world = place(empty, glider, top, left).astype(bool)
 
         self.redraw(message="Grille réinitialisée avec un glider.")
 
