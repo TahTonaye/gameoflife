@@ -7,38 +7,9 @@ from PySide6.QtWidgets import (
     QGridLayout, QVBoxLayout, QHBoxLayout, QLabel
 )
 
-
-def step(world):
-    """
-    Calcule une génération suivante du Game of Life.
-
-    Règles :
-    - une cellule vivante survit si elle a 2 ou 3 voisines vivantes
-    - une cellule morte naît si elle a exactement 3 voisines vivantes
-    - les bords sont des murs : pas de wrap-around
-    """
-    # Convertit le booléen en 0/1 pour pouvoir additionner les voisins.
-    w = world.astype(int)
-
-    # Ajoute une bordure de 0 autour de la grille.
-    # Ça évite de sortir des limites quand on regarde les voisins.
-    p = np.pad(w, 1, mode="constant", constant_values=0)
-
-    # Somme des 8 voisins de chaque cellule.
-    neighbours = (
-        p[:-2, :-2] + p[:-2, 1:-1] + p[:-2, 2:] +
-        p[1:-1, :-2] +               p[1:-1, 2:] +
-        p[2:, :-2] +  p[2:, 1:-1] +  p[2:, 2:]
-    )
-
-    # Une cellule vivante survit avec 2 ou 3 voisins.
-    survive = world & ((neighbours == 2) | (neighbours == 3))
-
-    # Une cellule morte devient vivante avec exactement 3 voisins.
-    born = (~world) & (neighbours == 3)
-
-    # La nouvelle grille est l'union des survivantes et des nouvelles nées.
-    return survive | born
+# La logique du jeu vit dans le moteur : l'interface ne fait
+# qu'afficher l'état et déclencher les générations.
+from game_of_life.engine import step
 
 
 class GameOfLife(QWidget):
